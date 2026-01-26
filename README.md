@@ -266,10 +266,4 @@ Dự án này đáp ứng các yêu cầu:
 - Một số minutiae có thể có góc hướng `None` khi không đủ điểm để tính vector
 - Hệ thống tự động bỏ qua các trường hợp đặc biệt
 
-## Đóng góp
-
-Dự án được xây dựng cho môn học Hệ Cơ sở Dữ liệu Đa phương tiện và Phân tán.
-
----
-
 **Lưu ý**: Đảm bảo đã cài đặt đầy đủ dependencies trước khi chạy chương trình.
