@@ -78,8 +78,8 @@ btl/
 ## Cài đặt
 
 ### 1. Yêu cầu
-- Python 3.12+
-- pip
+- Python 3.8+
+- Trình quản lý gói `pip`
 
 ### 2. Clone Repository
 
@@ -91,7 +91,12 @@ cd btl
 ### 3. Cài đặt Dependencies
 
 ```bash
-pip install opencv-python numpy tqdm scikit-image torch torchvision pandas matplotlib
+python -m pip install opencv-python numpy tqdm scikit-image torch torchvision pandas matplotlib
+```
+hoặc 
+
+```bash
+python -m pip install -r requirements.txt
 ```
 
 Hoặc nếu đã có virtual environment:
