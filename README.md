@@ -107,30 +107,61 @@ Hoặc nếu đã có virtual environment:
 pip install opencv-python numpy tqdm scikit-image torch torchvision pandas matplotlib
 ```
 
-## CÁCH CHẠY ĐƠN GIẢN NHẤT
+## CÁCH CHẠY
 
-### Bước 1: Cài đặt thư viện
+### 🌐 Phương án 1: Giao diện Web (KHUYÊN DÙNG)
+
+**Xem từng bước xử lý ảnh trực quan trên trình duyệt**
+
+#### Bước 1: Cài thư viện
+```bash
+pip install opencv-python numpy scikit-image
+```
+
+#### Bước 2: Chạy server
+```bash
+python server.py
+```
+
+#### Bước 3: Mở trình duyệt
+Truy cập: **http://localhost:8080**
+
+#### Bước 4: Sử dụng
+- **Nút "Upload và Xử lý"** 🔵: Upload ảnh vân tay của bạn
+- **Nút "Xem Demo"** 🔴: Xem demo với ảnh mẫu có sẵn
+
+#### Kết quả
+- Hiển thị **9 bước xử lý** chi tiết với ảnh kết quả
+- Giải thích từng bước
+- Giao diện đẹp, dễ hiểu
+
+---
+
+### 💻 Phương án 2: Command Line
+
+**Tìm kiếm vân tay trong database**
+
+#### Bước 1: Cài thư viện
 ```bash
 pip install opencv-python numpy tqdm scikit-image torch torchvision pandas matplotlib
 ```
 
-### Bước 2: Chạy chương trình
+#### Bước 2: Chạy chương trình
 ```bash
 python pipline.py
 ```
 
-### Bước 3: Nhập đường dẫn ảnh
-Khi chương trình yêu cầu, nhập đường dẫn ảnh vân tay:
+#### Bước 3: Nhập đường dẫn ảnh
 ```
 Mời nhập link ảnh: ./data/dataset/test/DB1/101_1.tif
 ```
 
-### Kết quả
-- Hiển thị thời gian xử lý (khoảng 6-7 giây)
-- Đường dẫn ảnh vân tay khớp nhất trong database
-- Cửa sổ hiển thị ảnh vân tay tìm được
+#### Kết quả
+- Thời gian xử lý: ~6-7 giây
+- Đường dẫn ảnh khớp nhất trong database
+- Cửa sổ hiển thị ảnh tìm được
 
-### Ví dụ kết quả
+#### Ví dụ
 ```
 6.665056467056274
 ./data/dataset/train/DB2/109_7.tif
