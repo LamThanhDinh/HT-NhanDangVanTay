@@ -248,12 +248,25 @@
 
         .step-image {
             width: 100%;
-            max-width: 800px;
+            max-width: 400px;  /* Giảm từ 600px xuống 400px để nhỏ gọn hơn */
             height: auto;
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             margin: 0 auto;
             display: block;
+            cursor: pointer;  /* Hint: có thể click để zoom */
+            transition: transform 0.3s ease;
+        }
+
+        .step-image:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Ảnh composite lớn hơn */
+        .composite-image {
+            max-width: 95% !important;  /* Composite rộng hơn */
+            border: 3px solid #2196F3;
         }
 
         .error {
@@ -314,6 +327,10 @@
             .step-card {
                 margin: 0 -10px;
             }
+            
+            .step-image {
+                max-width: 100%;  /* Mobile: full width */
+            }
         }
 
         .comparison-mode {
@@ -326,6 +343,105 @@
         .comparison-mode .step-image {
             max-width: 45%;
             min-width: 300px;
+        }
+
+        /* Modal for image zoom */
+        .image-modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            overflow: hidden;
+        }
+
+        .image-modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            position: relative;
+            max-width: 95%;
+            max-height: 95%;
+            overflow: auto;
+        }
+
+        .modal-image {
+            display: block;
+            width: auto;
+            height: auto;
+            max-width: none;
+            cursor: grab;
+            transition: transform 0.1s ease-out;
+        }
+
+        .modal-image.grabbing {
+            cursor: grabbing;
+        }
+
+        .modal-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 10000;
+        }
+
+        .modal-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-btn:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+
+        .modal-info {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            color: #333;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .close-modal {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 0, 0, 0.8);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 10001;
+        }
+
+        .close-modal:hover {
+            background: rgba(255, 0, 0, 1);
+            transform: scale(1.05);
         }
     </style>
 </head>
@@ -372,6 +488,23 @@
                  KẾT QUẢ XỬ LÝ TỪNG BƯỚC
             </h2>
             <div class="steps-container" id="stepsContainer"></div>
+        </div>
+    </div>
+
+    <!-- Modal for image zoom -->
+    <div class="image-modal" id="imageModal">
+        <button class="close-modal" id="closeModal">✕ Đóng</button>
+        <div class="modal-controls">
+            <button class="modal-btn" id="zoomIn" title="Phóng to">🔍+</button>
+            <button class="modal-btn" id="zoomOut" title="Thu nhỏ">🔍-</button>
+            <button class="modal-btn" id="resetZoom" title="Reset">↺</button>
+            <button class="modal-btn" id="downloadImage" title="Tải xuống">💾</button>
+        </div>
+        <div class="modal-content" id="modalContent">
+            <img class="modal-image" id="modalImage" alt="Zoomed image">
+        </div>
+        <div class="modal-info">
+            🖱️ Scroll để zoom | ✋ Kéo để di chuyển | 💾 Tải xuống | ✕ Đóng để quay lại
         </div>
     </div>
 
@@ -497,6 +630,9 @@
                 stepCard.className = 'step-card';
                 stepCard.style.animationDelay = `${index * 0.1}s`;
 
+                // Thêm class đặc biệt cho ảnh composite
+                const imageClass = step.step === 9 ? 'step-image composite-image' : 'step-image';
+                
                 stepCard.innerHTML = `
                     <div class="step-header">
                         <div class="step-number">${step.step}</div>
@@ -506,8 +642,10 @@
                         <div class="step-description">${step.description}</div>
                         <div class="step-details">
                             <strong>📋 Chi tiết:</strong> ${step.details}
+                            ${step.legend ? `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ccc;"><strong>📝 Chú thích:</strong> ${step.legend}</div>` : ''}
                         </div>
-                        <img src="${step.image}" alt="${step.name}" class="step-image">
+                        <img src="${step.image}" alt="${step.name}" class="${imageClass}" 
+                             data-step-name="${step.name}" onclick="openImageModal(this)">
                     </div>
                 `;
 
@@ -521,6 +659,171 @@
                 results.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 300);
         }
+
+        // Image modal functionality
+        const imageModal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        const modalContent = document.getElementById('modalContent');
+        const closeModal = document.getElementById('closeModal');
+        const zoomInBtn = document.getElementById('zoomIn');
+        const zoomOutBtn = document.getElementById('zoomOut');
+        const resetZoomBtn = document.getElementById('resetZoom');
+        const downloadBtn = document.getElementById('downloadImage');
+
+        let currentScale = 1;
+        let currentImageName = '';
+        let isPanning = false;
+        let startX = 0;
+        let startY = 0;
+        let translateX = 0;
+        let translateY = 0;
+
+        function openImageModal(imgElement) {
+            modalImage.src = imgElement.src;
+            currentImageName = imgElement.dataset.stepName || 'fingerprint-step';
+            imageModal.classList.add('active');
+            resetImageTransform();
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageModal() {
+            imageModal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        function resetImageTransform() {
+            currentScale = 1;
+            translateX = 0;
+            translateY = 0;
+            updateImageTransform();
+        }
+
+        function updateImageTransform() {
+            modalImage.style.transform = `scale(${currentScale}) translate(${translateX}px, ${translateY}px)`;
+        }
+
+        function zoomIn() {
+            currentScale = Math.min(currentScale * 1.2, 10);
+            updateImageTransform();
+        }
+
+        function zoomOut() {
+            currentScale = Math.max(currentScale / 1.2, 0.5);
+            updateImageTransform();
+        }
+
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.href = modalImage.src;
+            link.download = `${currentImageName.replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.png`;
+            link.click();
+        }
+
+        // Event listeners for modal
+        closeModal.addEventListener('click', closeImageModal);
+        zoomInBtn.addEventListener('click', zoomIn);
+        zoomOutBtn.addEventListener('click', zoomOut);
+        resetZoomBtn.addEventListener('click', resetImageTransform);
+        downloadBtn.addEventListener('click', downloadImage);
+
+        // Close modal on background click
+        imageModal.addEventListener('click', (e) => {
+            if (e.target === imageModal) {
+                closeImageModal();
+            }
+        });
+
+        // Mouse wheel zoom
+        modalContent.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (e.deltaY < 0) {
+                zoomIn();
+            } else {
+                zoomOut();
+            }
+        });
+
+        // Pan functionality
+        modalImage.addEventListener('mousedown', (e) => {
+            isPanning = true;
+            modalImage.classList.add('grabbing');
+            startX = e.clientX - translateX;
+            startY = e.clientY - translateY;
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isPanning) return;
+            translateX = e.clientX - startX;
+            translateY = e.clientY - startY;
+            updateImageTransform();
+        });
+
+        document.addEventListener('mouseup', () => {
+            isPanning = false;
+            modalImage.classList.remove('grabbing');
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (!imageModal.classList.contains('active')) return;
+            
+            switch(e.key) {
+                case 'Escape':
+                    closeImageModal();
+                    break;
+                case '+':
+                case '=':
+                    zoomIn();
+                    break;
+                case '-':
+                    zoomOut();
+                    break;
+                case '0':
+                    resetImageTransform();
+                    break;
+                case 's':
+                case 'S':
+                    downloadImage();
+                    break;
+            }
+        });
+
+        // Touch support for mobile
+        let initialDistance = 0;
+        modalImage.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                initialDistance = Math.hypot(
+                    e.touches[0].pageX - e.touches[1].pageX,
+                    e.touches[0].pageY - e.touches[1].pageY
+                );
+            } else if (e.touches.length === 1) {
+                isPanning = true;
+                startX = e.touches[0].clientX - translateX;
+                startY = e.touches[0].clientY - translateY;
+            }
+        });
+
+        modalImage.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                const currentDistance = Math.hypot(
+                    e.touches[0].pageX - e.touches[1].pageX,
+                    e.touches[0].pageY - e.touches[1].pageY
+                );
+                const scale = currentDistance / initialDistance;
+                currentScale = Math.min(Math.max(currentScale * scale, 0.5), 10);
+                initialDistance = currentDistance;
+                updateImageTransform();
+            } else if (e.touches.length === 1 && isPanning) {
+                translateX = e.touches[0].clientX - startX;
+                translateY = e.touches[0].clientY - startY;
+                updateImageTransform();
+            }
+        });
+
+        modalImage.addEventListener('touchend', () => {
+            isPanning = false;
+        });
 
         function showError(message) {
             errorDiv.textContent = '❌ Lỗi: ' + message;

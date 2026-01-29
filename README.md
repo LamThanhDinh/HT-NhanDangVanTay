@@ -71,7 +71,7 @@ btl/
 ├── output/                        # Kết quả xử lý
 │   └── DB3/                      # Ảnh đã xử lý từ DB3
 │
-├── finegerprint_pipline.py       # Pipeline xử lý batch
+├── fingerprint_pipline.py       # Pipeline xử lý batch
 └── pipline.py                    # Pipeline tìm kiếm đơn lẻ
 ```
 
@@ -176,7 +176,7 @@ Mời nhập link ảnh: ./data/dataset/test/DB1/101_1.tif
 Xử lý và lưu kết quả cho tất cả ảnh trong thư mục:
 
 ```bash
-python finegerprint_pipline.py
+python fingerprint_pipline.py
 ```
 
 **Input:** Ảnh trong `./data/dataset/train/DB3/`

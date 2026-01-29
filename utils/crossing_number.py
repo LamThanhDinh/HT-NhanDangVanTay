@@ -53,14 +53,40 @@ def calculate_minutiaes(im, kernel_size=3):
     biniry_image = biniry_image.astype(np.int8)
 
     (y, x) = im.shape
-    result = cv.cvtColor(im, cv.COLOR_GRAY2RGB)
-    colors = {"ending" : (150, 0, 0), "bifurcation" : (0, 150, 0)}
+    result = cv.cvtColor(im, cv.COLOR_GRAY2BGR) # Use BGR for OpenCV
+    # RED for Ending, GREEN for Bifurcation (BGR format)
+    colors = {"ending" : (0, 0, 255), "bifurcation" : (0, 255, 0)}
 
     # iterate each pixel minutia
     for i in range(1, x - kernel_size//2):
         for j in range(1, y - kernel_size//2):
             minutiae = minutiae_at(biniry_image, j, i, kernel_size)
             if minutiae != "none":
-                cv.circle(result, (i,j), radius=2, color=colors[minutiae], thickness=2)
+                # Draw filled circle with small radius
+                cv.circle(result, (i,j), radius=3, color=colors[minutiae], thickness=-1)
+                # Optional: Add white contour for better visibility
+                # cv.circle(result, (i,j), radius=3, color=(255,255,255), thickness=1)
+
+    # --- ADD LEGEND ON IMAGE ---
+    # Box background (White)
+    legend_w = 110
+    legend_h = 50
+    margin = 10
+    box_top_left = (margin, y - legend_h - margin)
+    box_bottom_right = (margin + legend_w, y - margin)
+    
+    # Draw semi-transparent background if possible, but for simplicity solid white
+    cv.rectangle(result, box_top_left, box_bottom_right, (255, 255, 255), -1)
+    cv.rectangle(result, box_top_left, box_bottom_right, (0, 0, 0), 1) # Black border
+
+    # Ending Item
+    cv.circle(result, (margin + 15, y - margin - 35), 4, colors["ending"], -1)
+    cv.putText(result, "Ending", (margin + 30, y - margin - 30), 
+               cv.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 0), 1, cv.LINE_AA)
+
+    # Bifurcation Item
+    cv.circle(result, (margin + 15, y - margin - 15), 4, colors["bifurcation"], -1)
+    cv.putText(result, "Bifurcation", (margin + 30, y - margin - 10), 
+               cv.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 0), 1, cv.LINE_AA)
 
     return result
